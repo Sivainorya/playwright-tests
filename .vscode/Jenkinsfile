@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+
+    tools {
+        nodejs 'NodeJS 18.x' // Name must match what's in Global Tools
+    }
+
+    environment {
+        CI = 'true'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git url: 'https://your-repo-url.git', branch: 'main'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+                sh 'npm run install-deps'
+            }
+        }
+
+        stage('Run Playwright Tests') {
+            steps {
+                sh 'npx playwright test --reporter=html'
+            }
+        }
+
+        stage('Archive Report') {
+            steps {
+                publishHTML(target: [
+                    reportDir: 'playwright-report',
+                    reportFiles: 'index.html',
+                    reportName: 'Playwright HTML Report'
+                ])
+            }
+        }
+    }
+}
